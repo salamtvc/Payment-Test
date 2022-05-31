@@ -1,0 +1,72 @@
+version: "3.1"
+   
+services:
+  db:
+    image: postgres:10-alpine
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:       
+      - live
+
+  redis:
+    image: redis:alpine
+    hostname: redis
+    ports:
+      - "6379:6379"
+    networks:       
+      - live
+  django:
+    build: .
+    command: sh -c "./entrypoint.sh"
+    volumes:
+      - static_volume:/home/app/staticfiles
+    stdin_open: true
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:       
+      - live
+
+  celery:
+    build:
+      context: .
+    command: celery -A payment_test worker -l info
+    depends_on:
+      - django
+      - redis
+      - db
+    restart: on-failure
+    env_file:
+      - .env
+    networks:       
+      - live
+
+  nginx:
+    image: nginx
+    hostname: nginx
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./nginx_config/nginx:/etc/nginx/conf.d
+      - static_volume:/home/app/staticfiles
+    depends_on:
+      - django
+    networks:
+      - live
+
+volumes:
+  db-data:
+  static_volume:
+
+networks:
+  live:
