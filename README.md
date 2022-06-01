@@ -1,13 +1,6 @@
-## Description:
 
-If payment details are successfully submitted by using the payment info endpoint, celery background task will trigger to access the external endpoint for payment status update.
-If that external API call failure is because of an irregular response or failure then the celery task will be retried using exponential backoff and jitter value, retry countdown time will be less than 64 seconds and exponentially increase from 0 to 64 seconds.
-The number of API retry values will be 10, after maximum retry, the celery task will raise an exception in logs.
 
-## Installation steps
-
-Make sure docker and docker-compose packages are installed in your system
-
+## Setup
 
 1. clone the git repository in your system
 
@@ -37,6 +30,7 @@ Make sure docker and docker-compose packages are installed in your system
 		exit
 
 8. Use postman or curl to interact with API endpoints and observe the docker-compose output log to check external API call and celery retry.
+
 
 ## List of APIs to interact with service
 
