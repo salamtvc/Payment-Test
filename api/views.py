@@ -3,9 +3,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from api.models import PaymentUpdate
+from api.serializers import PaymentUpdateSerializer
 from api.tasks import retry_with_backoff
 from api.utils import get_random_number
-
+from rest_framework import serializers
 
 class UpdatePaymentView(APIView):
 	permission_classes = [IsAuthenticated]
@@ -25,7 +26,8 @@ class UpdatePaymentView(APIView):
 	def get(self, request):
 		response = {}
 		response["status"] = "success"
-		response["object_list"] = PaymentUpdate.objects.all()
+		object_list = PaymentUpdate.objects.all()
+		response["objects"] = list( PaymentUpdate.objects.values())
 		return Response(response, status=status.HTTP_200_OK)
 
 
